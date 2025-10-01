@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konverter Biner ke IPv4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .input-group input {
+            width: 22%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .input-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .output-group input {
+            width: 22%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .tips {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Konverter Biner ke IPv4</h1>
+        
+        <p>Masukkan alamat IP dalam format biner untuk dikonversi ke format desimal</p>
+        
+        <div>
+            <label for="binary-ip">Alamat IPv4 (Biner)</label>
+            <div class="input-group">
+                <input type="text" id="octet1" maxlength="8" placeholder="00000000">
+                <span>.</span>
+                <input type="text" id="octet2" maxlength="8" placeholder="00000000">
+                <span>.</span>
+                <input type="text" id="octet3" maxlength="8" placeholder="00000000">
+                <span>.</span>
+                <input type="text" id="octet4" maxlength="8" placeholder="00000000">
+            </div>
+        </div>
+
+        <button onclick="convertBinaryToDecimal()">Konversi ke Desimal</button>
+        
+        <div>
+            <label for="decimal-ip">Hasil Desimal</label>
+            <div class="output-group">
+                <input type="text" id="dec1" readonly placeholder="0">
+                <span>.</span>
+                <input type="text" id="dec2" readonly placeholder="0">
+                <span>.</span>
+                <input type="text" id="dec3" readonly placeholder="0">
+                <span>.</span>
+                <input type="text" id="dec4" readonly placeholder="0">
+            </div>
+        </div>
+
+        <div class="tips">
+            💡 Tips: Setiap oktet biner IPv4 harus berupa 8 bit (hanya 0 dan 1). Hasil desimal akan ditampilkan dalam format 0-255 untuk setiap oktet.
+        </div>
+    </div>
+
+    <script>
+        function convertBinaryToDecimal() {
+            const octets = ['octet1', 'octet2', 'octet3', 'octet4'];
+            const decOutputs = ['dec1', 'dec2', 'dec3', 'dec4'];
+            let isValid = true;
+
+            for (let i = 0; i < 4; i++) {
+                const binary = document.getElementById(octets[i]).value.trim().replace(/\s/g, '');
+                const decOutput = document.getElementById(decOutputs[i]);
+
+                // Validasi: harus 8 karakter, hanya 0 dan 1
+                if (binary.length !== 8 || !/^[01]{8}$/.test(binary)) {
+                    decOutput.value = 'Invalid';
+                    isValid = false;
+                    continue;
+                }
+
+                // Konversi biner ke desimal
+                const decimal = parseInt(binary, 2);
+                decOutput.value = decimal;
+            }
+
+            if (!isValid) {
+                alert('Pastikan setiap oktet biner tepat 8 bit dan hanya berisi 0 atau 1!');
+            }
+        }
+
+        // Event listener untuk input real-time (opsional)
+        document.querySelectorAll('#octet1, #octet2, #octet3, #octet4').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^01]/g, ''); // Hanya izinkan 0 dan 1
+            });
+        });
+    </script>
+</body>
+</html>

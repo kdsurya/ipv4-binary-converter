@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konverter IPv4 ke Biner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            width: 100%;
+            height: 100vh; /* isi penuh layar */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .ip-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ip-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .ip-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .ip-input.error {
+            border-color: #ff4757;
+            background-color: #ffebee;
+        }
+
+        .dot {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .binary-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .binary-input {
+            flex: 1;
+            padding: 10px 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 28px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            letter-spacing: 10px;
+        }
+
+        .convert-btn {
+            width: 30%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 18px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Konverter IPv4 ke Biner</h1>
+        <p class="subtitle">Masukkan alamat IP untuk dikonversi ke format biner</p>
+
+        <div class="input-group">
+            <label class="label">Alamat IPv4 (Desimal)</label>
+            <div class="ip-inputs">
+                <input type="text" class="ip-input" id="ip1" maxlength="3" placeholder="192">
+                <span class="dot">.</span>
+                <input type="text" class="ip-input" id="ip2" maxlength="3" placeholder="168">
+                <span class="dot">.</span>
+                <input type="text" class="ip-input" id="ip3" maxlength="3" placeholder="1">
+                <span class="dot">.</span>
+                <input type="text" class="ip-input" id="ip4" maxlength="3" placeholder="1">
+            </div>
+            <div class="error-message" id="errorMsg"></div>
+        </div>
+
+        <button class="convert-btn" onclick="convertToBinary()">Konversi ke Biner</button>
+
+        <div class="input-group">
+            <label class="label">Hasil Biner (8 bit per oktet)</label>
+            <div class="binary-inputs">
+                <input type="text" class="binary-input" id="bin1" readonly placeholder="00000000">
+                <span class="dot">.</span>
+                <input type="text" class="binary-input" id="bin2" readonly placeholder="00000000">
+                <span class="dot">.</span>
+                <input type="text" class="binary-input" id="bin3" readonly placeholder="00000000">
+                <span class="dot">.</span>
+                <input type="text" class="binary-input" id="bin4" readonly placeholder="00000000">
+            </div>
+        </div>
+
+        <div class="info-box">
+            💡 <strong>Tips:</strong> Setiap oktet IPv4 harus berupa angka antara 0-255. Hasil biner akan ditampilkan dalam format 8 bit untuk setiap oktet.
+        </div>
+    </div>
+
+    <script>
+        // Auto focus next input
+        const ipInputs = [
+            document.getElementById('ip1'),
+            document.getElementById('ip2'),
+            document.getElementById('ip3'),
+            document.getElementById('ip4')
+        ];
+
+        ipInputs.forEach((input, index) => {
+            input.addEventListener('input', function(e) {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Auto move to next input
+                if (this.value.length === 3 && index < 3) {
+                    ipInputs[index + 1].focus();
+                }
+                
+                // Remove error styling on input
+                this.classList.remove('error');
+                document.getElementById('errorMsg').textContent = '';
+            });
+
+            input.addEventListener('keydown', function(e) {
+                // Move to next on dot press
+                if (e.key === '.' && index < 3) {
+                    e.preventDefault();
+                    ipInputs[index + 1].focus();
+                }
+                
+                // Move to previous on backspace if empty
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    ipInputs[index - 1].focus();
+                }
+            });
+
+            // Convert on Enter key
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    convertToBinary();
+                }
+            });
+        });
+
+        function convertToBinary() {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = '';
+            
+            let isValid = true;
+            const values = [];
+
+            // Validate all inputs
+            ipInputs.forEach((input, index) => {
+                const value = input.value.trim();
+                
+                if (value === '') {
+                    input.classList.add('error', 'shake');
+                    errorMsg.textContent = 'Semua oktet harus diisi!';
+                    isValid = false;
+                    setTimeout(() => input.classList.remove('shake'), 300);
+                    return;
+                }
+
+                const num = parseInt(value);
+                
+                if (isNaN(num) || num < 0 || num > 255) {
+                    input.classList.add('error', 'shake');
+                    errorMsg.textContent = `Oktet ${index + 1} harus berupa angka antara 0-255!`;
+                    isValid = false;
+                    setTimeout(() => input.classList.remove('shake'), 300);
+                    return;
+                }
+
+                input.classList.remove('error');
+                values.push(num);
+            });
+
+            if (!isValid) return;
+
+            // Convert to binary
+            values.forEach((value, index) => {
+                const binary = value.toString(2).padStart(8, '0');
+                document.getElementById(`bin${index + 1}`).value = binary;
+            });
+        }
+
+        // Set default example
+        window.onload = function() {
+            document.getElementById('ip1').value = '192';
+            document.getElementById('ip2').value = '168';
+            document.getElementById('ip3').value = '1';
+            document.getElementById('ip4').value = '1';
+            convertToBinary();
+        };
+    </script>
+</body>
+</html>
