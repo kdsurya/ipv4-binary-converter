@@ -1,261 +1,500 @@
 <!doctype html>
 <html lang="id">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Konverter IPv4 ↔ Biner (Real-Time)</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f4f4f4;
-            }
-            .container {
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-            h1 {
-                text-align: center;
-                color: #333;
-            }
-            .section {
-                margin-bottom: 30px;
-                padding: 15px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-            .section h2 {
-                margin-top: 0;
-                color: #007bff;
-            }
-            .input-group {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 10px;
-            }
-            .input-group input {
-                width: 20%;
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                text-align: center;
-            }
-            .input-group input:focus {
-                border-color: #007bff;
-                outline: none;
-            }
-            .binary-input input {
-                font-family: monospace;
-                letter-spacing: 4px;
-                width: 18%;
-            }
-            .tips {
-                margin-top: 20px;
-                padding: 10px;
-                background-color: #e7f3ff;
-                border-left: 4px solid #007bff;
-                font-size: 14px;
-            }
-            .error {
-                color: #dc3545;
-                font-size: 12px;
-                margin-top: 5px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🌐 Konverter IPv4 ↔ Biner</h1>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Konverter IPv4 ↔ Biner + CIDR</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #1c2128;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --accent2: #3fb950;
+            --accent3: #f78166;
+            --accent4: #d2a8ff;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --ip-color: #58a6ff;
+            --mask-color: #3fb950;
+            --error: #f78166;
+        }
 
-            <p>
-                Masukkan alamat IP di salah satu sisi (desimal atau biner), dan
-                sisi lainnya akan otomatis berubah.
-            </p>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-            <div class="section">
-                <h2>Alamat IPv4 (Desimal)</h2>
-                <div class="input-group">
-                    <input
-                        type="number"
-                        id="dec1"
-                        min="0"
-                        max="255"
-                        placeholder="0"
-                        value="0"
-                    />
-                    <span>.</span>
-                    <input
-                        type="number"
-                        id="dec2"
-                        min="0"
-                        max="255"
-                        placeholder="0"
-                        value="0"
-                    />
-                    <span>.</span>
-                    <input
-                        type="number"
-                        id="dec3"
-                        min="0"
-                        max="255"
-                        placeholder="0"
-                        value="0"
-                    />
-                    <span>.</span>
-                    <input
-                        type="number"
-                        id="dec4"
-                        min="0"
-                        max="255"
-                        placeholder="0"
-                        value="0"
-                    />
-                </div>
-                <div id="dec-error" class="error"></div>
-            </div>
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px 48px;
+        }
 
-            <div class="section">
-                <h2>Alamat IPv4 (Biner)</h2>
-                <div class="input-group binary-input">
-                    <input
-                        type="text"
-                        id="bin1"
-                        maxlength="8"
-                        placeholder="00000000"
-                        value="00000000"
-                    />
-                    <span>.</span>
-                    <input
-                        type="text"
-                        id="bin2"
-                        maxlength="8"
-                        placeholder="00000000"
-                        value="00000000"
-                    />
-                    <span>.</span>
-                    <input
-                        type="text"
-                        id="bin3"
-                        maxlength="8"
-                        placeholder="00000000"
-                        value="00000000"
-                    />
-                    <span>.</span>
-                    <input
-                        type="text"
-                        id="bin4"
-                        maxlength="8"
-                        placeholder="00000000"
-                        value="00000000"
-                    />
-                </div>
-                <div id="bin-error" class="error"></div>
-            </div>
+        .wrapper {
+            max-width: 820px;
+            margin: 0 auto;
+        }
 
-            <div class="tips">
-                💡 Tips: Setiap oktet desimal 0-255, biner tepat 8 bit (hanya 0
-                dan 1). Konversi real-time, tapi validasi akan menampilkan error
-                jika input salah.
-            </div>
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        header p {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 24px 20px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: inline-block;
+        }
+
+        .card-title .dot.green { background: var(--accent2); }
+
+        /* ── DECIMAL INPUT ROW ── */
+        .dec-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .dec-row input[type="number"] {
+            width: 64px;
+            padding: 10px 6px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ip-color);
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -moz-appearance: textfield;
+        }
+
+        .dec-row input[type="number"]::-webkit-inner-spin-button,
+        .dec-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+        .dec-row input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+        }
+
+        .dec-row input[type="number"].error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(247,129,102,0.15);
+        }
+
+        .sep {
+            font-size: 1.3rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .cidr-sep {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent4);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0 2px;
+            user-select: none;
+        }
+
+        .cidr-input {
+            width: 60px;
+            padding: 10px 6px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent4);
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -moz-appearance: textfield;
+        }
+
+        .cidr-input::-webkit-inner-spin-button,
+        .cidr-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+        .cidr-input:focus {
+            border-color: var(--accent4);
+            box-shadow: 0 0 0 3px rgba(210,168,255,0.15);
+        }
+
+        .cidr-input.error {
+            border-color: var(--error);
+        }
+
+        .cidr-label {
+            font-size: 0.75rem;
+            color: var(--accent4);
+            font-family: 'Sora', sans-serif;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+
+        /* ── SUBNET MASK DECIMAL ── */
+        .mask-dec-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .mask-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent2);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-right: 6px;
+            white-space: nowrap;
+        }
+
+        .mask-dec-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent2);
+            letter-spacing: 1px;
+        }
+
+        /* ── BINARY ROWS ── */
+        .bin-section { display: flex; flex-direction: column; gap: 14px; }
+
+        .bin-row-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+        .bin-row-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bin-row-label.ip  { color: var(--ip-color); }
+        .bin-row-label.mask { color: var(--accent2); }
+
+        .bin-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .bin-row input[type="text"] {
+            width: 112px;
+            padding: 9px 8px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: var(--ip-color);
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .bin-row input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+        }
+
+        .bin-row input[type="text"].error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(247,129,102,0.15);
+        }
+
+        /* Subnet mask binary — read-only display */
+        .bin-row.mask-row input[type="text"] {
+            color: var(--accent2);
+            cursor: default;
+        }
+
+        .bin-row.mask-row input[type="text"]:focus {
+            border-color: var(--accent2);
+            box-shadow: 0 0 0 3px rgba(63,185,80,0.12);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            border-top: 1px dashed var(--border);
+            margin: 4px 0 10px;
+        }
+
+        /* ── ERROR / INFO BAR ── */
+        .msg-bar {
+            min-height: 20px;
+            font-size: 0.78rem;
+            margin-top: 10px;
+        }
+
+        .msg-bar.error { color: var(--error); }
+        .msg-bar.ok    { color: var(--accent2); }
+
+        /* ── TIPS ── */
+        .tips {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 14px 16px;
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .tips strong { color: var(--text); }
+
+        /* ── BIT HIGHLIGHT in mask ── */
+        .bit-ones  { color: var(--accent2); }
+        .bit-zeros { color: var(--muted); opacity: 0.5; }
+
+        @media (max-width: 520px) {
+            .bin-row input[type="text"] { width: 88px; font-size: 0.78rem; letter-spacing: 2px; }
+            .dec-row input[type="number"] { width: 56px; font-size: 1rem; }
+            .cidr-input { width: 52px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    <header>
+        <h1>🌐 IPv4 <span>↔</span> Biner</h1>
+        <p>Konversi real-time · CIDR notation · Subnet Mask biner otomatis</p>
+    </header>
+
+    <!-- ══ DECIMAL CARD ══ -->
+    <div class="card">
+        <div class="card-title"><span class="dot"></span> Alamat IPv4 — Desimal + CIDR</div>
+
+        <div class="dec-row">
+            <input type="number" id="dec1" min="0" max="255" value="192" />
+            <span class="sep">.</span>
+            <input type="number" id="dec2" min="0" max="255" value="168" />
+            <span class="sep">.</span>
+            <input type="number" id="dec3" min="0" max="255" value="1" />
+            <span class="sep">.</span>
+            <input type="number" id="dec4" min="0" max="255" value="0" />
+            <span class="cidr-sep">/</span>
+            <input type="number" id="cidr" class="cidr-input" min="0" max="32" value="24" />
+            <span class="cidr-label">prefix length</span>
         </div>
 
-        <script>
-            const decInputs = ["dec1", "dec2", "dec3", "dec4"];
-            const binInputs = ["bin1", "bin2", "bin3", "bin4"];
-            let updatingFromBin = false;
-            let updatingFromDec = false;
+        <!-- Subnet mask decimal display -->
+        <div class="mask-dec-row">
+            <span class="mask-label">Subnet Mask</span>
+            <span class="mask-dec-value" id="mask-dec">255.255.255.0</span>
+        </div>
 
-            // Fungsi untuk konversi desimal ke biner
-            function decimalToBinary(dec) {
-                return ("00000000" + dec.toString(2)).slice(-8);
+        <div class="msg-bar error" id="dec-error"></div>
+    </div>
+
+    <!-- ══ BINARY CARD ══ -->
+    <div class="card">
+        <div class="card-title"><span class="dot green"></span> Alamat IPv4 — Biner</div>
+
+        <div class="bin-section">
+            <!-- IP Binary (editable) -->
+            <div class="bin-row-wrap">
+                <div class="bin-row-label ip">IP Address</div>
+                <div class="bin-row" id="ip-bin-row">
+                    <input type="text" id="bin1" maxlength="8" value="11000000" />
+                    <span class="sep">.</span>
+                    <input type="text" id="bin2" maxlength="8" value="10101000" />
+                    <span class="sep">.</span>
+                    <input type="text" id="bin3" maxlength="8" value="00000001" />
+                    <span class="sep">.</span>
+                    <input type="text" id="bin4" maxlength="8" value="00000000" />
+                </div>
+                <div class="msg-bar error" id="bin-error"></div>
+            </div>
+
+            <hr class="divider" />
+
+            <!-- Subnet Mask Binary (read-only) -->
+            <div class="bin-row-wrap">
+                <div class="bin-row-label mask">Subnet Mask  <span id="cidr-badge" style="font-size:0.7rem;color:var(--accent4);margin-left:6px;">/24</span></div>
+                <div class="bin-row mask-row">
+                    <input type="text" id="mbin1" readonly value="11111111" />
+                    <span class="sep">.</span>
+                    <input type="text" id="mbin2" readonly value="11111111" />
+                    <span class="sep">.</span>
+                    <input type="text" id="mbin3" readonly value="11111111" />
+                    <span class="sep">.</span>
+                    <input type="text" id="mbin4" readonly value="00000000" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tips">
+        💡 <strong>Cara pakai:</strong>
+        Ketik IP desimal lalu tambahkan prefix CIDR (0–32) — subnet mask desimal &amp; biner akan dihitung otomatis.
+        Atau ketik langsung di kolom biner IP; sisi desimal ikut berubah.
+        Kolom biner subnet mask <em>tidak bisa diedit</em> dan selalu mengikuti nilai prefix.
+    </div>
+
+</div>
+
+<script>
+    const decIds  = ['dec1','dec2','dec3','dec4'];
+    const binIds  = ['bin1','bin2','bin3','bin4'];
+    const mbinIds = ['mbin1','mbin2','mbin3','mbin4'];
+
+    let fromBin = false, fromDec = false;
+
+    /* ── Helpers ── */
+    function toBin8(n) { return ('00000000' + n.toString(2)).slice(-8); }
+    function fromBin8(s) { return parseInt(s, 2); }
+
+    function cidrToMaskOctets(prefix) {
+        prefix = Math.max(0, Math.min(32, prefix));
+        const full = (prefix === 0) ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0;
+        return [
+            (full >>> 24) & 0xFF,
+            (full >>> 16) & 0xFF,
+            (full >>>  8) & 0xFF,
+             full         & 0xFF,
+        ];
+    }
+
+    function updateMaskDisplay(prefix) {
+        const octets = cidrToMaskOctets(prefix);
+        document.getElementById('mask-dec').textContent = octets.join('.');
+        document.getElementById('cidr-badge').textContent = '/' + prefix;
+        mbinIds.forEach((id, i) => {
+            document.getElementById(id).value = toBin8(octets[i]);
+        });
+    }
+
+    /* ── Decimal → Binary ── */
+    function decToBin() {
+        if (fromBin) return;
+        fromDec = true;
+
+        let ok = true, msg = '';
+        decIds.forEach((id, i) => {
+            const el  = document.getElementById(id);
+            const val = parseInt(el.value);
+            if (isNaN(val) || val < 0 || val > 255) {
+                ok = false; msg = 'Oktet desimal harus bernilai 0–255';
+                el.classList.add('error');
+            } else {
+                el.classList.remove('error');
+                document.getElementById(binIds[i]).value = toBin8(val);
+                document.getElementById(binIds[i]).classList.remove('error');
             }
+        });
 
-            // Fungsi untuk konversi biner ke desimal
-            function binaryToDecimal(bin) {
-                return parseInt(bin, 2);
+        document.getElementById('dec-error').textContent = ok ? '' : msg;
+        document.getElementById('bin-error').textContent = '';
+
+        // CIDR / mask
+        const cidrEl = document.getElementById('cidr');
+        const prefix = parseInt(cidrEl.value);
+        if (isNaN(prefix) || prefix < 0 || prefix > 32) {
+            cidrEl.classList.add('error');
+            document.getElementById('dec-error').textContent = 'Prefix CIDR harus 0–32';
+        } else {
+            cidrEl.classList.remove('error');
+            updateMaskDisplay(prefix);
+        }
+
+        fromDec = false;
+    }
+
+    /* ── Binary → Decimal ── */
+    function binToDec() {
+        if (fromDec) return;
+        fromBin = true;
+
+        let ok = true, msg = '';
+        binIds.forEach((id, i) => {
+            const el  = document.getElementById(id);
+            const val = el.value.trim();
+            if (val.length !== 8 || !/^[01]{8}$/.test(val)) {
+                ok = false; msg = 'Oktet biner harus tepat 8 bit (0 dan 1)';
+                el.classList.add('error');
+            } else {
+                el.classList.remove('error');
+                document.getElementById(decIds[i]).value = fromBin8(val);
+                document.getElementById(decIds[i]).classList.remove('error');
             }
+        });
 
-            // Update biner dari desimal
-            function updateBinaryFromDecimal() {
-                if (updatingFromBin) return;
-                updatingFromDec = true;
-                let valid = true;
-                let errorMsg = "";
+        document.getElementById('bin-error').textContent = ok ? '' : msg;
+        document.getElementById('dec-error').textContent = '';
 
-                decInputs.forEach((id, i) => {
-                    const input = document.getElementById(id);
-                    const value = parseInt(input.value) || 0;
-                    if (value < 0 || value > 255) {
-                        valid = false;
-                        errorMsg = "Oktet desimal harus 0-255";
-                        input.style.borderColor = "#dc3545";
-                    } else {
-                        input.style.borderColor = "#ddd";
-                        const binary = decimalToBinary(value);
-                        document.getElementById(binInputs[i]).value = binary;
-                    }
-                });
+        fromBin = false;
+    }
 
-                document.getElementById("dec-error").textContent = valid
-                    ? ""
-                    : errorMsg;
-                document.getElementById("bin-error").textContent = "";
+    /* ── Event Listeners ── */
+    decIds.forEach(id => {
+        document.getElementById(id).addEventListener('input', decToBin);
+    });
 
-                updatingFromDec = false;
-            }
+    document.getElementById('cidr').addEventListener('input', decToBin);
 
-            // Update desimal dari biner
-            function updateDecimalFromBinary() {
-                if (updatingFromDec) return;
-                updatingFromBin = true;
-                let valid = true;
-                let errorMsg = "";
+    binIds.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            this.value = this.value.replace(/[^01]/g, '');
+            binToDec();
+        });
+    });
 
-                binInputs.forEach((id, i) => {
-                    const input = document.getElementById(id);
-                    const binary = input.value.trim().replace(/\s/g, "");
-                    if (binary.length !== 8 || !/^[01]{8}$/.test(binary)) {
-                        valid = false;
-                        errorMsg = "Oktet biner harus tepat 8 bit (0/1)";
-                        input.style.borderColor = "#dc3545";
-                    } else {
-                        input.style.borderColor = "#ddd";
-                        const decimal = binaryToDecimal(binary);
-                        document.getElementById(decInputs[i]).value = decimal;
-                    }
-                });
-
-                document.getElementById("bin-error").textContent = valid
-                    ? ""
-                    : errorMsg;
-                document.getElementById("dec-error").textContent = "";
-
-                updatingFromBin = false;
-            }
-
-            // Event listeners untuk desimal inputs
-            decInputs.forEach((id) => {
-                document
-                    .getElementById(id)
-                    .addEventListener("input", updateBinaryFromDecimal);
-            });
-
-            // Event listeners untuk biner inputs
-            binInputs.forEach((id) => {
-                const input = document.getElementById(id);
-                input.addEventListener("input", function () {
-                    this.value = this.value.replace(/[^01]/g, ""); // Hanya izinkan 0 dan 1
-                    updateDecimalFromBinary();
-                });
-            });
-
-            // Inisialisasi: update sekali untuk sinkronisasi awal
-            updateBinaryFromDecimal();
-        </script>
-    </body>
+    /* ── Init ── */
+    decToBin();
+</script>
+</body>
 </html>
